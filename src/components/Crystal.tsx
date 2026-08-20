@@ -1,3 +1,6 @@
-export function Crystal() {
-  return null
-}
+export {
+  createCrystals,
+  drawCrystal,
+  layoutCrystals,
+  updateCrystal,
+} from '../game/crystal'
