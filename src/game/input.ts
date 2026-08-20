@@ -1,4 +1,6 @@
 import type { Axis, Direction } from './types'
+import { clamp } from './math'
+import { unlockAudio } from './audio'
 
 const DIRECTION_BY_CODE: Record<string, Direction> = {
   ArrowUp: 'up',
@@ -11,18 +13,30 @@ const DIRECTION_BY_CODE: Record<string, Direction> = {
   KeyD: 'right',
 }
 
+const ATTACK_CODES = new Set(['Space', 'KeyJ', 'Enter'])
+
 export function createKeyboard() {
   const held = new Set<string>()
+  let attackQueued = false
 
   const onDown = (event: KeyboardEvent) => {
-    if (!(event.code in DIRECTION_BY_CODE)) return
-    event.preventDefault()
-    held.add(event.code)
+    unlockAudio()
+    if (event.code in DIRECTION_BY_CODE) {
+      event.preventDefault()
+      held.add(event.code)
+      return
+    }
+
+    if (ATTACK_CODES.has(event.code)) {
+      event.preventDefault()
+      if (!event.repeat) attackQueued = true
+    }
   }
 
   const onUp = (event: KeyboardEvent) => {
-    if (!(event.code in DIRECTION_BY_CODE)) return
-    event.preventDefault()
+    if (event.code in DIRECTION_BY_CODE || ATTACK_CODES.has(event.code)) {
+      event.preventDefault()
+    }
     held.delete(event.code)
   }
 
@@ -41,6 +55,15 @@ export function createKeyboard() {
       window.removeEventListener('keyup', onUp)
       window.removeEventListener('blur', onBlur)
       held.clear()
+      attackQueued = false
+    },
+    consumeAttack() {
+      const queued = attackQueued
+      attackQueued = false
+      return queued
+    },
+    queueAttack() {
+      attackQueued = true
     },
     axis(): Axis {
       let x = 0
@@ -55,9 +78,16 @@ export function createKeyboard() {
       }
 
       return {
-        x: Math.max(-1, Math.min(1, x)),
-        y: Math.max(-1, Math.min(1, y)),
+        x: clamp(x, -1, 1),
+        y: clamp(y, -1, 1),
       }
     },
+  }
+}
+
+export function mergeAxis(a: Axis, b: Axis): Axis {
+  return {
+    x: clamp(a.x + b.x, -1, 1),
+    y: clamp(a.y + b.y, -1, 1),
   }
 }
