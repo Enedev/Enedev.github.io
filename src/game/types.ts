@@ -22,4 +22,41 @@ export type Player = {
   speed: number
   direction: Direction
   isMoving: boolean
+  animTime: number
+  frame: number
+  attackTime: number
+}
+
+export type Crystal = {
+  id: CrystalId
+  nx: number
+  ny: number
+  x: number
+  y: number
+  width: number
+  height: number
+  state: CrystalState
+  breakTime: number
+  label: string
+  color: string
+  highlight: string
+  shadow: string
+}
+
+export type Particle = {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  life: number
+  maxLife: number
+  size: number
+  color: string
+}
+
+export type Rect = {
+  x: number
+  y: number
+  width: number
+  height: number
 }

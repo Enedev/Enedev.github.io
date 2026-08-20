@@ -1,4 +1,5 @@
 export {
+  attackHitbox,
   createPlayer,
   drawPlayer,
   spawnPlayer,
