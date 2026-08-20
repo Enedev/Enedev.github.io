@@ -1,12 +1,120 @@
 @import "tailwindcss";
 
-html,
-body,
-#root {
-  min-height: 100%;
+@theme {
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --color-arcade-void: #07040f;
+  --color-arcade-night: #12081f;
+  --color-arcade-panel: #1c102e;
+  --color-arcade-bezel: #2a1648;
+  --color-arcade-cyan: #5ef2ff;
+  --color-arcade-magenta: #ff4fd8;
+  --color-arcade-gold: #ffe566;
+  --color-arcade-lime: #7cff6b;
+  --color-arcade-muted: #9b87b8;
 }
 
-body {
-  margin: 0;
-  overflow: hidden;
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: var(--color-arcade-void);
+    color: var(--color-arcade-cyan);
+    font-family: var(--font-pixel);
+    line-height: 1.8;
+    -webkit-font-smoothing: none;
+    image-rendering: pixelated;
+  }
+
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  ::selection {
+    background: var(--color-arcade-magenta);
+    color: var(--color-arcade-void);
+  }
+}
+
+@layer components {
+  .arcade-stage {
+    min-height: 100svh;
+    background-color: var(--color-arcade-void);
+    background-image:
+      radial-gradient(circle at 50% 0%, rgb(255 79 216 / 0.16), transparent 42%),
+      radial-gradient(1px 1px at 12% 18%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 78% 22%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 32% 68%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 88% 74%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 54% 40%, rgb(94 242 255 / 0.8) 60%, transparent 61%);
+  }
+
+  .arcade-bezel {
+    box-shadow:
+      0 0 0 4px #14081f,
+      0 0 0 8px #ff4fd8,
+      0 0 0 12px #2a1648,
+      0 0 0 16px #5ef2ff,
+      0 0 0 20px #12081f,
+      0 24px 0 12px #090412;
+  }
+
+  .arcade-screen {
+    background-color: #0d0820;
+    background-image:
+      linear-gradient(rgb(94 242 255 / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(94 242 255 / 0.07) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  .arcade-scanlines {
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0.22) 0px,
+      rgb(0 0 0 / 0.22) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  .arcade-vignette {
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 42%,
+      rgb(0 0 0 / 0.55) 100%
+    );
+  }
+
+  .arcade-glow {
+    text-shadow:
+      0 0 8px currentColor,
+      0 0 16px currentColor;
+  }
+
+  .arcade-blink {
+    animation: arcade-blink 1.1s steps(2, jump-none) infinite;
+  }
+}
+
+@keyframes arcade-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
 }
