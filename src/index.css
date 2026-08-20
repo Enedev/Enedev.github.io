@@ -22,6 +22,7 @@
 
   html {
     color-scheme: dark;
+    overscroll-behavior: none;
   }
 
   body {
@@ -33,6 +34,7 @@
     line-height: 1.8;
     -webkit-font-smoothing: none;
     image-rendering: pixelated;
+    overscroll-behavior: none;
   }
 
   canvas {
@@ -105,6 +107,19 @@
 
   .arcade-blink {
     animation: arcade-blink 1.1s steps(2, jump-none) infinite;
+  }
+
+  .arcade-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-arcade-magenta) var(--color-arcade-night);
+  }
+
+  .arcade-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .arcade-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-arcade-magenta);
   }
 }
 
