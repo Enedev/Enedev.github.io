@@ -1,3 +1,6 @@
-export function Character() {
-  return null
-}
+export {
+  createPlayer,
+  drawPlayer,
+  spawnPlayer,
+  updatePlayer,
+} from '../game/character'
