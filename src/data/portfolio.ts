@@ -254,7 +254,7 @@ export const PORTFOLIO: Record<Locale, Record<ContentCrystalId, PortfolioSection
     about: {
       title: 'Sobre mí',
       kicker: 'PLAYER 1',
-      body: 'Neithan Felipe Gómez Rivera. Estudiante de último año de Ingeniería de Sistemas en la Universidad de Medellín (top 5%, promoción 2027) y desarrollador web full-stack radicado en Medellín, Colombia. Saco a producción apps web y móviles con arquitecturas REST sólidas, CI/CD, y un hobby paralelo en desarrollo de videojuegos (Unity / Godot).',
+      body: 'Neithan Felipe Gómez Rivera. Estudiante de último año de Ingeniería de Sistemas en la Universidad de Medellín (top 5%, promoción 2027) y desarrollador web full-stack ubicado en Medellín, Colombia. Saco a producción apps web y móviles con arquitecturas REST sólidas, CI/CD, y un hobby paralelo en desarrollo de videojuegos (Unity / Godot).',
     },
     skills: {
       title: 'Habilidades',
@@ -312,7 +312,7 @@ export const PORTFOLIO: Record<Locale, Record<ContentCrystalId, PortfolioSection
     contact: {
       title: 'Contacto',
       kicker: 'INSERT COIN',
-      body: 'Radicado en Medellín. Abierto a trabajo full-stack web, desarrollo móvil y a trabajar de forma productiva. Escríbeme por los canales de abajo.',
+      body: 'Ubicado en Medellín. Abierto a trabajo full-stack web, desarrollo móvil y a trabajar de forma productiva. Escríbeme por los canales de abajo.',
       links: LINKS,
     },
   },
