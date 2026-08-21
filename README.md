@@ -17,6 +17,10 @@ npm run dev
 
 Edit copy in `src/data/portfolio.ts`.
 
+Live site: https://enedev.github.io/
+
+GitHub Pages needs **Settings → Pages → Source: GitHub Actions**. A workflow builds Vite and publishes `dist` on every push to `main`.
+
 ## Scripts
 
 ```bash
