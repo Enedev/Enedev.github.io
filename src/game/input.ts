@@ -84,10 +84,3 @@ export function createKeyboard() {
     },
   }
 }
-
-export function mergeAxis(a: Axis, b: Axis): Axis {
-  return {
-    x: clamp(a.x + b.x, -1, 1),
-    y: clamp(a.y + b.y, -1, 1),
-  }
-}

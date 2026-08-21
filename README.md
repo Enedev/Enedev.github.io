@@ -9,8 +9,8 @@ npm run dev
 ```
 
 - Press **Space**, **Enter**, click, or tap **START** to begin
-- Move with **WASD**, arrows, click/drag, or the on-screen pad
-- Hold **Shift** (or **RUN** on touch) to sprint
+- Move with **WASD**, arrows, or click/drag (on a phone, drag with your finger)
+- Hold **Shift** to sprint
 - Smash a crystal by walking into it
 - Each crystal opens a modal: About, Skills, Experience, Projects, or Contact
 - Broken crystals stay smashed for the rest of the session

@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { createPlayer, drawPlayer, spawnPlayer, updatePlayer } from './Character'
 import { createCrystals, createRestartCrystal, drawCrystal, layoutCrystals, updateCrystal } from './Crystal'
 import { CONTENT_CRYSTAL_IDS } from '../game/crystal'
-import { createKeyboard, mergeAxis } from '../game/input'
+import { createKeyboard } from '../game/input'
 import { aabb } from '../game/math'
 import { drawParticles, spawnBurst, updateParticles } from '../game/particles'
 import type { Axis, ContentCrystalId, CrystalId, Particle } from '../game/types'
@@ -10,8 +10,6 @@ import type { Axis, ContentCrystalId, CrystalId, Particle } from '../game/types'
 type GameCanvasProps = {
   paused?: boolean
   brokenIds: ContentCrystalId[]
-  touchAxis: Axis
-  touchSprint: boolean
   crystalLabels: Record<CrystalId, string>
   canvasLabel: string
   onCrystalBroken: (id: ContentCrystalId) => void
@@ -29,8 +27,6 @@ type PointerGoal = {
 export function GameCanvas({
   paused = false,
   brokenIds,
-  touchAxis,
-  touchSprint,
   crystalLabels,
   canvasLabel,
   onCrystalBroken,
@@ -41,8 +37,6 @@ export function GameCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pausedRef = useRef(paused)
   const brokenRef = useRef(brokenIds)
-  const touchAxisRef = useRef(touchAxis)
-  const touchSprintRef = useRef(touchSprint)
   const labelsRef = useRef(crystalLabels)
   const onBrokenRef = useRef(onCrystalBroken)
   const onResetRef = useRef(onReset)
@@ -52,8 +46,6 @@ export function GameCanvas({
   useLayoutEffect(() => {
     pausedRef.current = paused
     brokenRef.current = brokenIds
-    touchAxisRef.current = touchAxis
-    touchSprintRef.current = touchSprint
     labelsRef.current = crystalLabels
     onBrokenRef.current = onCrystalBroken
     onResetRef.current = onReset
@@ -159,10 +151,8 @@ export function GameCanvas({
       if (!pausedRef.current) {
         const keys = keyboard.axis()
         const usingKeys = keys.x !== 0 || keys.y !== 0
-        const axis = usingKeys
-          ? mergeAxis(keys, touchAxisRef.current)
-          : mergeAxis(pointerAxis(), touchAxisRef.current)
-        const sprinting = keyboard.isSprinting() || touchSprintRef.current
+        const axis = usingKeys ? keys : pointerAxis()
+        const sprinting = keyboard.isSprinting()
         updatePlayer(player, axis, dt, bounds(), sprinting)
 
         if (player.isMoving && player.frame !== lastWalkFrame) {

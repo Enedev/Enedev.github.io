@@ -4,13 +4,10 @@ import { GameCanvas } from './components/GameCanvas'
 import { InfoModal } from './components/InfoModal'
 import { PauseMenu } from './components/PauseMenu'
 import { StartScreen } from './components/StartScreen'
-import { TouchControls } from './components/TouchControls'
 import { playHit, playModal, playStep, unlockAudio } from './game/audio'
 import { CONTENT_CRYSTAL_IDS } from './game/crystal'
 import { useLanguage } from './i18n/LanguageContext'
-import type { Axis, ContentCrystalId } from './game/types'
-
-const ZERO_AXIS: Axis = { x: 0, y: 0 }
+import type { ContentCrystalId } from './game/types'
 
 export default function App() {
   const { t } = useLanguage()
@@ -19,8 +16,6 @@ export default function App() {
   const [worldKey, setWorldKey] = useState(0)
   const [brokenIds, setBrokenIds] = useState<ContentCrystalId[]>([])
   const [openId, setOpenId] = useState<ContentCrystalId | null>(null)
-  const [touchAxis, setTouchAxis] = useState<Axis>(ZERO_AXIS)
-  const [touchSprint, setTouchSprint] = useState(false)
 
   const startGame = () => {
     unlockAudio()
@@ -31,21 +26,15 @@ export default function App() {
   const resumeGame = () => {
     unlockAudio()
     setPaused(false)
-    setTouchAxis(ZERO_AXIS)
-    setTouchSprint(false)
   }
 
   const pauseGame = () => {
     setPaused(true)
-    setTouchAxis(ZERO_AXIS)
-    setTouchSprint(false)
   }
 
   const onReset = () => {
     setBrokenIds([])
     setOpenId(null)
-    setTouchAxis(ZERO_AXIS)
-    setTouchSprint(false)
     setPaused(false)
     setWorldKey((key) => key + 1)
   }
@@ -79,8 +68,6 @@ export default function App() {
   const onCrystalBroken = (id: ContentCrystalId) => {
     setBrokenIds((current) => (current.includes(id) ? current : [...current, id]))
     setOpenId(id)
-    setTouchAxis(ZERO_AXIS)
-    setTouchSprint(false)
     playModal()
   }
 
@@ -97,8 +84,6 @@ export default function App() {
         key={worldKey}
         paused={!playing}
         brokenIds={brokenIds}
-        touchAxis={touchAxis}
-        touchSprint={touchSprint}
         crystalLabels={t.crystalLabels}
         canvasLabel={t.canvasLabel}
         onCrystalBroken={onCrystalBroken}
@@ -109,12 +94,17 @@ export default function App() {
       <div className="arcade-vignette pointer-events-none absolute inset-0 z-10" />
       <div className="arcade-scanlines pointer-events-none absolute inset-0 z-20" />
       {playing && brokenIds.length === 0 ? (
-        <p className="pointer-events-none absolute bottom-24 left-1/2 z-30 w-[90%] -translate-x-1/2 text-center text-[8px] leading-loose text-arcade-gold sm:bottom-6">
-          {t.hintMove}
-        </p>
+        <>
+          <p className="pointer-events-none absolute bottom-6 left-1/2 z-30 w-[90%] -translate-x-1/2 text-center text-[8px] leading-loose text-arcade-gold lg:hidden">
+            {t.hintMoveTouch}
+          </p>
+          <p className="pointer-events-none absolute bottom-6 left-1/2 z-30 hidden w-[90%] -translate-x-1/2 text-center text-[8px] leading-loose text-arcade-gold lg:block">
+            {t.hintMove}
+          </p>
+        </>
       ) : null}
       {playing && brokenIds.length === CONTENT_CRYSTAL_IDS.length ? (
-        <p className="pointer-events-none absolute bottom-24 left-1/2 z-30 w-[90%] -translate-x-1/2 text-center text-[8px] leading-loose text-arcade-gold sm:bottom-6">
+        <p className="pointer-events-none absolute bottom-6 left-1/2 z-30 w-[90%] -translate-x-1/2 text-center text-[8px] leading-loose text-arcade-gold">
           {t.hintRetry}
         </p>
       ) : null}
@@ -129,21 +119,12 @@ export default function App() {
       ) : null}
       {!started ? <StartScreen onStart={startGame} /> : null}
       {started && paused ? <PauseMenu onResume={resumeGame} onReset={onReset} /> : null}
-      {playing ? (
-        <TouchControls
-          axis={touchAxis}
-          sprinting={touchSprint}
-          onAxis={setTouchAxis}
-          onSprint={setTouchSprint}
-        />
-      ) : null}
       <InfoModal
         crystalId={openId}
         smashed={brokenIds.length}
         total={CONTENT_CRYSTAL_IDS.length}
         onClose={() => {
           setOpenId(null)
-          setTouchSprint(false)
           unlockAudio()
         }}
       />

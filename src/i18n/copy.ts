@@ -15,6 +15,7 @@ export type UiCopy = {
   pauseHint: string
   reset: string
   hintMove: string
+  hintMoveTouch: string
   hintRetry: string
   crystals: string
   close: string
@@ -23,7 +24,6 @@ export type UiCopy = {
   sprintHint: string
   pausedHint: string
   credit: string
-  run: string
   pauseButton: string
   canvasLabel: string
   crystalLabels: Record<CrystalId, string>
@@ -44,6 +44,7 @@ export const COPY: Record<Locale, UiCopy> = {
     pauseHint: 'ESC TO RESUME',
     reset: 'RESET',
     hintMove: 'TOUCH A CRYSTAL. CLICK OR DRAG TO MOVE. SHIFT RUNS.',
+    hintMoveTouch: 'DRAG WITH YOUR FINGER TO MOVE.',
     hintRetry: 'TOUCH RETRY TO RESET',
     crystals: 'CRYSTALS',
     close: 'CLOSE',
@@ -52,9 +53,8 @@ export const COPY: Record<Locale, UiCopy> = {
     sprintHint: 'SHIFT RUN',
     pausedHint: 'PAUSED',
     credit: 'CREDIT',
-    run: 'RUN',
     pauseButton: 'PAUSE',
-    canvasLabel: 'Pixel portfolio. Click or drag to move. Touch a crystal to open it. Hold Shift to run.',
+    canvasLabel: 'Pixel portfolio. Drag or click to move. Touch a crystal to open it. Hold Shift to run.',
     crystalLabels: {
       about: 'ABOUT',
       skills: 'SKILLS',
@@ -78,6 +78,7 @@ export const COPY: Record<Locale, UiCopy> = {
     pauseHint: 'ESC PARA CONTINUAR',
     reset: 'REINICIAR',
     hintMove: 'TOCA UN CRISTAL. CLIC O ARRASTRA PARA MOVERTE. SHIFT PARA CORRER.',
+    hintMoveTouch: 'ARRASTRA CON EL DEDO PARA MOVERTE.',
     hintRetry: 'TOCA RETRY PARA REINICIAR',
     crystals: 'CRISTALES',
     close: 'CERRAR',
@@ -86,10 +87,9 @@ export const COPY: Record<Locale, UiCopy> = {
     sprintHint: 'SHIFT CORRE',
     pausedHint: 'PAUSA',
     credit: 'CREDIT',
-    run: 'CORRER',
     pauseButton: 'PAUSA',
     canvasLabel:
-      'Portafolio en pixel art. Haz clic o arrastra para moverte. Toca un cristal para abrirlo. Mantén Shift para correr.',
+      'Portafolio en pixel art. Arrastra con el dedo para moverte. Toca un cristal para abrirlo.',
     crystalLabels: {
       about: 'SOBRE',
       skills: 'SKILLS',
