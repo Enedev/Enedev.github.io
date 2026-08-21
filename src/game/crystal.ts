@@ -1,4 +1,4 @@
-import type { Crystal, CrystalId, WorldBounds } from './types'
+import type { Crystal, ContentCrystalId, CrystalId, WorldBounds } from './types'
 import { PIXEL, drawSprite } from './sprite'
 
 const COLS = 10
@@ -32,7 +32,7 @@ type CrystalTheme = {
   S: string
 }
 
-export const CRYSTAL_LAYOUT: Record<CrystalId, CrystalTheme> = {
+export const CRYSTAL_LAYOUT: Record<ContentCrystalId, CrystalTheme> = {
   about: {
     label: 'ABOUT',
     nx: 0.22,
@@ -75,28 +75,31 @@ export const CRYSTAL_LAYOUT: Record<CrystalId, CrystalTheme> = {
   },
 }
 
-export const ALL_CRYSTAL_IDS = Object.keys(CRYSTAL_LAYOUT) as CrystalId[]
+export const CONTENT_CRYSTAL_IDS = Object.keys(CRYSTAL_LAYOUT) as ContentCrystalId[]
+export const ALL_CRYSTAL_IDS = CONTENT_CRYSTAL_IDS
+
+const RESTART_THEME: CrystalTheme = {
+  label: 'RETRY',
+  nx: 0.5,
+  ny: 0.28,
+  C: '#ffe566',
+  W: '#fff8d0',
+  S: '#7a6a22',
+}
 
 export function createCrystals(brokenIds: Iterable<CrystalId>): Crystal[] {
   const broken = new Set(brokenIds)
 
-  return ALL_CRYSTAL_IDS.filter((id) => !broken.has(id)).map((id) => {
+  return CONTENT_CRYSTAL_IDS.filter((id) => !broken.has(id)).map((id) => {
     const theme = CRYSTAL_LAYOUT[id]
-    return {
-      id,
-      nx: theme.nx,
-      ny: theme.ny,
-      x: 0,
-      y: 0,
-      width: CRYSTAL_SIZE.width,
-      height: CRYSTAL_SIZE.height,
-      state: 'idle',
-      breakTime: 0,
-      label: theme.label,
-      color: theme.C,
-      highlight: theme.W,
-      shadow: theme.S,
-    }
+    return makeCrystal(id, theme)
+  })
+}
+
+export function createRestartCrystal(preferTop: boolean): Crystal {
+  return makeCrystal('restart', {
+    ...RESTART_THEME,
+    ny: preferTop ? 0.22 : 0.78,
   })
 }
 
@@ -143,4 +146,22 @@ export function drawCrystal(
   ctx.textBaseline = 'bottom'
   ctx.fillStyle = crystal.color
   ctx.fillText(crystal.label, x + crystal.width / 2, y - 4)
+}
+
+function makeCrystal(id: CrystalId, theme: CrystalTheme): Crystal {
+  return {
+    id,
+    nx: theme.nx,
+    ny: theme.ny,
+    x: 0,
+    y: 0,
+    width: CRYSTAL_SIZE.width,
+    height: CRYSTAL_SIZE.height,
+    state: 'idle',
+    breakTime: 0,
+    label: theme.label,
+    color: theme.C,
+    highlight: theme.W,
+    shadow: theme.S,
+  }
 }

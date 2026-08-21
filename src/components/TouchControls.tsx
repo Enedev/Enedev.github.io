@@ -1,12 +1,13 @@
 import { useRef } from 'react'
 import { unlockAudio } from '../game/audio'
+import { useLanguage } from '../i18n/LanguageContext'
 import type { Axis, Direction } from '../game/types'
 
 type TouchControlsProps = {
   axis: Axis
-  attacking: boolean
+  sprinting: boolean
   onAxis: (axis: Axis) => void
-  onAttack: (pressed: boolean) => void
+  onSprint: (pressed: boolean) => void
 }
 
 const DIRS: { dir: Direction; label: string; className: string }[] = [
@@ -16,7 +17,8 @@ const DIRS: { dir: Direction; label: string; className: string }[] = [
   { dir: 'down', label: '▼', className: 'col-start-2 row-start-3' },
 ]
 
-export function TouchControls({ axis, attacking, onAxis, onAttack }: TouchControlsProps) {
+export function TouchControls({ axis, sprinting, onAxis, onSprint }: TouchControlsProps) {
+  const { t } = useLanguage()
   const heldRef = useRef(new Set<Direction>())
 
   const syncAxis = () => {
@@ -31,7 +33,7 @@ export function TouchControls({ axis, attacking, onAxis, onAttack }: TouchContro
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex items-end justify-between p-3 md:hidden">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex items-end justify-between gap-3 p-3 lg:hidden">
       <div className="pointer-events-auto grid grid-cols-3 grid-rows-3 gap-1">
         {DIRS.map((item) => {
           const active =
@@ -44,8 +46,8 @@ export function TouchControls({ axis, attacking, onAxis, onAttack }: TouchContro
             <button
               key={item.dir}
               type="button"
-              aria-label={`Move ${item.dir}`}
-              className={`touch-none ${item.className} h-12 w-12 border-2 border-arcade-cyan bg-arcade-night/90 text-[12px] text-arcade-cyan ${active ? 'bg-arcade-cyan text-arcade-void' : ''}`}
+              aria-label={item.dir}
+              className={`touch-none ${item.className} h-12 w-12 border-2 border-arcade-cyan bg-arcade-night/90 text-[12px] text-arcade-cyan sm:h-14 sm:w-14 ${active ? 'bg-arcade-cyan text-arcade-void' : ''}`}
               onPointerDown={(event) => {
                 event.preventDefault()
                 unlockAudio()
@@ -70,9 +72,9 @@ export function TouchControls({ axis, attacking, onAxis, onAttack }: TouchContro
 
       <button
         type="button"
-        aria-label="Smash crystal"
-        className={`pointer-events-auto mb-2 h-16 w-16 touch-none rounded-full border-4 text-[12px] ${
-          attacking
+        aria-label={t.run}
+        className={`pointer-events-auto mb-2 h-16 w-16 touch-none rounded-full border-4 text-[10px] sm:h-20 sm:w-20 ${
+          sprinting
             ? 'border-arcade-gold bg-arcade-gold text-arcade-void'
             : 'border-arcade-magenta bg-arcade-night/90 text-arcade-magenta'
         }`}
@@ -80,12 +82,12 @@ export function TouchControls({ axis, attacking, onAxis, onAttack }: TouchContro
           event.preventDefault()
           unlockAudio()
           event.currentTarget.setPointerCapture(event.pointerId)
-          onAttack(true)
+          onSprint(true)
         }}
-        onPointerUp={() => onAttack(false)}
-        onPointerCancel={() => onAttack(false)}
+        onPointerUp={() => onSprint(false)}
+        onPointerCancel={() => onSprint(false)}
       >
-        A
+        {t.run}
       </button>
     </div>
   )

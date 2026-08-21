@@ -1,15 +1,18 @@
 import { useEffect } from 'react'
 import { PORTFOLIO } from '../data/portfolio'
-import type { CrystalId } from '../game/types'
+import { useLanguage } from '../i18n/LanguageContext'
+import type { ContentCrystalId } from '../game/types'
 
 type InfoModalProps = {
-  crystalId: CrystalId | null
+  crystalId: ContentCrystalId | null
   smashed: number
   total: number
   onClose: () => void
 }
 
 export function InfoModal({ crystalId, smashed, total, onClose }: InfoModalProps) {
+  const { locale, t } = useLanguage()
+
   useEffect(() => {
     if (!crystalId) return
 
@@ -26,7 +29,7 @@ export function InfoModal({ crystalId, smashed, total, onClose }: InfoModalProps
 
   if (!crystalId) return null
 
-  const section = PORTFOLIO[crystalId]
+  const section = PORTFOLIO[locale][crystalId]
 
   return (
     <div
@@ -88,7 +91,18 @@ export function InfoModal({ crystalId, smashed, total, onClose }: InfoModalProps
           <ul className="mt-5 space-y-3">
             {section.projects.map((project) => (
               <li key={project.name} className="border-2 border-arcade-bezel bg-arcade-panel p-3">
-                <p className="text-[8px] text-arcade-lime sm:text-[10px]">{project.name}</p>
+                {project.href ? (
+                  <a
+                    className="text-[8px] text-arcade-lime underline decoration-2 underline-offset-4 sm:text-[10px]"
+                    href={project.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {project.name}
+                  </a>
+                ) : (
+                  <p className="text-[8px] text-arcade-lime sm:text-[10px]">{project.name}</p>
+                )}
                 <p className="mt-2 text-[8px] leading-loose text-arcade-muted">{project.blurb}</p>
                 <p className="mt-2 text-[8px] text-arcade-cyan">{project.tags.join(' / ')}</p>
               </li>
@@ -115,14 +129,14 @@ export function InfoModal({ crystalId, smashed, total, onClose }: InfoModalProps
 
         <div className="mt-6 flex items-center justify-between gap-3">
           <p className="text-[8px] text-arcade-muted">
-            {smashed}/{total} CRYSTALS
+            {smashed}/{total} {t.crystals}
           </p>
           <button
             type="button"
             className="border-2 border-arcade-gold bg-arcade-panel px-3 py-2 text-[8px] text-arcade-gold sm:text-[10px]"
             onClick={onClose}
           >
-            CLOSE
+            {t.close}
           </button>
         </div>
       </article>

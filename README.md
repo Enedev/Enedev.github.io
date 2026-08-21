@@ -8,8 +8,10 @@ Interactive 2D pixel-art portfolio built with React, Vite, TypeScript, and Tailw
 npm run dev
 ```
 
-- Move with **WASD** or **arrow keys**
-- Smash a crystal by walking into it, pressing **Space / J / Enter**, or tapping **A** on mobile
+- Press **Space**, **Enter**, click, or tap **START** to begin
+- Move with **WASD**, arrows, click/drag, or the on-screen pad
+- Hold **Shift** (or **RUN** on touch) to sprint
+- Smash a crystal by walking into it
 - Each crystal opens a modal: About, Skills, Experience, Projects, or Contact
 - Broken crystals stay smashed for the rest of the session
 
@@ -23,6 +25,10 @@ npm run build    # type-check and production build
 npm run preview  # preview the production build
 npm run lint     # run oxlint
 ```
+
+## Credits
+
+Player ship: [Void Main Ship](https://foozlecc.itch.io/void-main-ship) by Foozle (CC0).
 
 ## Stack
 

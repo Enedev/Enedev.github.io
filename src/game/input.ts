@@ -13,11 +13,11 @@ const DIRECTION_BY_CODE: Record<string, Direction> = {
   KeyD: 'right',
 }
 
-const ATTACK_CODES = new Set(['Space', 'KeyJ', 'Enter'])
+const SPRINT_CODES = new Set(['ShiftLeft', 'ShiftRight'])
 
 export function createKeyboard() {
   const held = new Set<string>()
-  let attackQueued = false
+  let sprinting = false
 
   const onDown = (event: KeyboardEvent) => {
     unlockAudio()
@@ -27,21 +27,26 @@ export function createKeyboard() {
       return
     }
 
-    if (ATTACK_CODES.has(event.code)) {
+    if (SPRINT_CODES.has(event.code)) {
       event.preventDefault()
-      if (!event.repeat) attackQueued = true
+      sprinting = true
     }
   }
 
   const onUp = (event: KeyboardEvent) => {
-    if (event.code in DIRECTION_BY_CODE || ATTACK_CODES.has(event.code)) {
+    if (event.code in DIRECTION_BY_CODE) {
       event.preventDefault()
+      held.delete(event.code)
     }
-    held.delete(event.code)
+    if (SPRINT_CODES.has(event.code)) {
+      event.preventDefault()
+      sprinting = false
+    }
   }
 
   const onBlur = () => {
     held.clear()
+    sprinting = false
   }
 
   return {
@@ -55,15 +60,10 @@ export function createKeyboard() {
       window.removeEventListener('keyup', onUp)
       window.removeEventListener('blur', onBlur)
       held.clear()
-      attackQueued = false
+      sprinting = false
     },
-    consumeAttack() {
-      const queued = attackQueued
-      attackQueued = false
-      return queued
-    },
-    queueAttack() {
-      attackQueued = true
+    isSprinting() {
+      return sprinting
     },
     axis(): Axis {
       let x = 0

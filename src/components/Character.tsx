@@ -1,7 +1,1 @@
-export {
-  attackHitbox,
-  createPlayer,
-  drawPlayer,
-  spawnPlayer,
-  updatePlayer,
-} from '../game/character'
+export { createPlayer, drawPlayer, spawnPlayer, updatePlayer } from '../game/character'

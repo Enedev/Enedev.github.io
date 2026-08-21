@@ -1,4 +1,6 @@
-export type CrystalId = 'about' | 'skills' | 'experience' | 'projects' | 'contact'
+export type ContentCrystalId = 'about' | 'skills' | 'experience' | 'projects' | 'contact'
+
+export type CrystalId = ContentCrystalId | 'restart'
 
 export type CrystalState = 'idle' | 'breaking' | 'broken'
 
@@ -21,10 +23,11 @@ export type Player = {
   height: number
   speed: number
   direction: Direction
+  angle: number
   isMoving: boolean
+  isSprinting: boolean
   animTime: number
   frame: number
-  attackTime: number
 }
 
 export type Crystal = {

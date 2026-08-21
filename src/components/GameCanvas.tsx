@@ -1,33 +1,40 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import {
-  attackHitbox,
-  createPlayer,
-  drawPlayer,
-  spawnPlayer,
-  updatePlayer,
-} from './Character'
-import { createCrystals, drawCrystal, layoutCrystals, updateCrystal } from './Crystal'
+import { createPlayer, drawPlayer, spawnPlayer, updatePlayer } from './Character'
+import { createCrystals, createRestartCrystal, drawCrystal, layoutCrystals, updateCrystal } from './Crystal'
+import { CONTENT_CRYSTAL_IDS } from '../game/crystal'
 import { createKeyboard, mergeAxis } from '../game/input'
 import { aabb } from '../game/math'
 import { drawParticles, spawnBurst, updateParticles } from '../game/particles'
-import type { Axis, CrystalId, Particle } from '../game/types'
+import type { Axis, ContentCrystalId, CrystalId, Particle } from '../game/types'
 
 type GameCanvasProps = {
   paused?: boolean
-  brokenIds: CrystalId[]
+  brokenIds: ContentCrystalId[]
   touchAxis: Axis
-  touchAttack: boolean
-  onCrystalBroken: (id: CrystalId) => void
+  touchSprint: boolean
+  crystalLabels: Record<CrystalId, string>
+  canvasLabel: string
+  onCrystalBroken: (id: ContentCrystalId) => void
+  onReset: () => void
   onStep?: () => void
   onHit?: () => void
+}
+
+type PointerGoal = {
+  active: boolean
+  x: number
+  y: number
 }
 
 export function GameCanvas({
   paused = false,
   brokenIds,
   touchAxis,
-  touchAttack,
+  touchSprint,
+  crystalLabels,
+  canvasLabel,
   onCrystalBroken,
+  onReset,
   onStep,
   onHit,
 }: GameCanvasProps) {
@@ -35,8 +42,10 @@ export function GameCanvas({
   const pausedRef = useRef(paused)
   const brokenRef = useRef(brokenIds)
   const touchAxisRef = useRef(touchAxis)
-  const touchAttackRef = useRef(touchAttack)
+  const touchSprintRef = useRef(touchSprint)
+  const labelsRef = useRef(crystalLabels)
   const onBrokenRef = useRef(onCrystalBroken)
+  const onResetRef = useRef(onReset)
   const onStepRef = useRef(onStep)
   const onHitRef = useRef(onHit)
 
@@ -44,8 +53,10 @@ export function GameCanvas({
     pausedRef.current = paused
     brokenRef.current = brokenIds
     touchAxisRef.current = touchAxis
-    touchAttackRef.current = touchAttack
+    touchSprintRef.current = touchSprint
+    labelsRef.current = crystalLabels
     onBrokenRef.current = onCrystalBroken
+    onResetRef.current = onReset
     onStepRef.current = onStep
     onHitRef.current = onHit
   })
@@ -63,15 +74,38 @@ export function GameCanvas({
     const crystals = createCrystals(brokenRef.current)
     const particles: Particle[] = []
     const smashed = new Set<CrystalId>(brokenRef.current)
+    const pointer: PointerGoal = { active: false, x: 0, y: 0 }
     let spawned = false
     let frameId = 0
     let lastTime = performance.now()
     let elapsed = 0
     let running = true
+    let spawnedRetry = false
     let lastWalkFrame = 0
-    let prevTouchAttack = false
 
     const bounds = () => ({ width: canvas.width, height: canvas.height })
+
+    const toCanvas = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      const scaleX = canvas.width / Math.max(rect.width, 1)
+      const scaleY = canvas.height / Math.max(rect.height, 1)
+      return {
+        x: (event.clientX - rect.left) * scaleX,
+        y: (event.clientY - rect.top) * scaleY,
+      }
+    }
+
+    const pointerAxis = (): Axis => {
+      if (!pointer.active) return { x: 0, y: 0 }
+      const dx = pointer.x - (player.x + player.width / 2)
+      const dy = pointer.y - (player.y + player.height / 2)
+      const dist = Math.hypot(dx, dy)
+      if (dist < 12) {
+        pointer.active = false
+        return { x: 0, y: 0 }
+      }
+      return { x: dx / dist, y: dy / dist }
+    }
 
     const smash = (id: CrystalId, x: number, y: number, colors: string[]) => {
       const crystal = crystals.find((item) => item.id === id)
@@ -79,6 +113,27 @@ export function GameCanvas({
       crystal.state = 'breaking'
       spawnBurst(particles, x, y, colors)
       onHitRef.current?.()
+    }
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (pausedRef.current) return
+      event.preventDefault()
+      canvas.setPointerCapture(event.pointerId)
+      const point = toCanvas(event)
+      pointer.active = true
+      pointer.x = point.x
+      pointer.y = point.y
+    }
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!pointer.active) return
+      const point = toCanvas(event)
+      pointer.x = point.x
+      pointer.y = point.y
+    }
+
+    const onPointerUp = () => {
+      pointer.active = false
     }
 
     const resize = () => {
@@ -101,46 +156,59 @@ export function GameCanvas({
       lastTime = now
       elapsed += dt
 
-      const queuedAttack = keyboard.consumeAttack()
-      const touchPressed = touchAttackRef.current && !prevTouchAttack
-      prevTouchAttack = touchAttackRef.current
-      const attacking = !pausedRef.current && (queuedAttack || touchPressed)
-
       if (!pausedRef.current) {
-        const axis = mergeAxis(keyboard.axis(), touchAxisRef.current)
-        updatePlayer(player, axis, dt, bounds(), attacking)
+        const keys = keyboard.axis()
+        const usingKeys = keys.x !== 0 || keys.y !== 0
+        const axis = usingKeys
+          ? mergeAxis(keys, touchAxisRef.current)
+          : mergeAxis(pointerAxis(), touchAxisRef.current)
+        const sprinting = keyboard.isSprinting() || touchSprintRef.current
+        updatePlayer(player, axis, dt, bounds(), sprinting)
 
         if (player.isMoving && player.frame !== lastWalkFrame) {
           lastWalkFrame = player.frame
           onStepRef.current?.()
         }
 
-        const strike = attacking ? attackHitbox(player) : null
-
         for (const crystal of crystals) {
           if (crystal.state !== 'idle') continue
-          const bodyHit = aabb(player, crystal)
-          const attackHit = strike ? aabb(strike, crystal) : false
-          if (bodyHit || attackHit) {
-            smash(
-              crystal.id,
-              crystal.x + crystal.width / 2,
-              crystal.y + crystal.height / 2,
-              [crystal.color, crystal.highlight, '#ffffff'],
-            )
-          }
+          if (!aabb(player, crystal)) continue
+          smash(
+            crystal.id,
+            crystal.x + crystal.width / 2,
+            crystal.y + crystal.height / 2,
+            [crystal.color, crystal.highlight, '#ffffff'],
+          )
         }
 
         for (const crystal of crystals) {
           if (updateCrystal(crystal, dt) && !smashed.has(crystal.id)) {
             crystal.state = 'broken'
             smashed.add(crystal.id)
+
+            if (crystal.id === 'restart') {
+              onResetRef.current()
+              continue
+            }
+
             onBrokenRef.current(crystal.id)
+            const cleared = CONTENT_CRYSTAL_IDS.every((id) => smashed.has(id))
+            if (cleared && !spawnedRetry) {
+              spawnedRetry = true
+              const retry = createRestartCrystal(player.y > canvas.height / 2)
+              crystals.push(retry)
+              layoutCrystals([retry], bounds())
+            }
           }
         }
       }
 
       updateParticles(particles, dt)
+
+      const labels = labelsRef.current
+      for (const crystal of crystals) {
+        crystal.label = labels[crystal.id] ?? crystal.label
+      }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       for (const crystal of crystals) drawCrystal(ctx, crystal, elapsed)
@@ -153,6 +221,10 @@ export function GameCanvas({
     observer.observe(parent)
     resize()
     keyboard.attach()
+    canvas.addEventListener('pointerdown', onPointerDown)
+    canvas.addEventListener('pointermove', onPointerMove)
+    canvas.addEventListener('pointerup', onPointerUp)
+    canvas.addEventListener('pointercancel', onPointerUp)
     frameId = requestAnimationFrame(tick)
 
     return () => {
@@ -160,14 +232,18 @@ export function GameCanvas({
       cancelAnimationFrame(frameId)
       keyboard.detach()
       observer.disconnect()
+      canvas.removeEventListener('pointerdown', onPointerDown)
+      canvas.removeEventListener('pointermove', onPointerMove)
+      canvas.removeEventListener('pointerup', onPointerUp)
+      canvas.removeEventListener('pointercancel', onPointerUp)
     }
   }, [])
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 z-0 block h-full w-full bg-transparent"
-      aria-label="Pixel portfolio game. Use WASD or arrow keys to move. Press Space or J to smash crystals."
+      className="absolute inset-0 z-0 block h-full w-full cursor-pointer touch-none bg-transparent"
+      aria-label={canvasLabel}
     />
   )
 }
